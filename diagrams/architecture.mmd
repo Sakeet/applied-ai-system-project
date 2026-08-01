@@ -1,0 +1,27 @@
+flowchart TD
+    subgraph Input
+        A[songs.csv Song Catalog]
+        B[User Taste Profile: genre, mood, energy, acoustic pref]
+    end
+
+    subgraph Core[src - Recommender Engine]
+        C[Data Loader: Reads CSV into Song objects]
+        D[Scoring Engine: Compares each Song vs UserProfile]
+        E[Ranker: Sorts songs by total score]
+    end
+
+    subgraph Output
+        F[Top-K Recommendations with score breakdown]
+    end
+
+    A --> C
+    C --> D
+    B --> D
+    D --> E
+    E --> F
+
+    subgraph Tests[tests]
+        G[test_recommender.py: Validates scoring logic]
+    end
+
+    D -.validated by.-> G
