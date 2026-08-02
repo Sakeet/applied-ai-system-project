@@ -1,18 +1,17 @@
 """
 Command line runner for the Music Recommender Simulation.
-
-This file helps you quickly run and test your recommender.
-
-You will implement the functions in recommender.py:
-- load_songs
-- score_song
-- recommend_songs
 """
+
+import os
 
 try:
     from .recommender import load_songs, recommend_songs
+    from .retriever import retrieve_context
+    from .rag_explainer import generate_explanation
 except ImportError:
     from recommender import load_songs, recommend_songs
+    from retriever import retrieve_context
+    from rag_explainer import generate_explanation
 
 
 HIGH_ENERGY_POP = {"genre": "pop", "mood": "happy", "energy": 0.8}
@@ -35,15 +34,25 @@ def print_recommendation_table(recommendations, mode: str) -> None:
         print(f"{rank:<4} {title:<22} {artist:<16} {score:>6.2f}  {reasons}")
 
 
-def main() -> None:
-    songs = load_songs("data/songs.csv") 
+def print_ai_explanations(recommendations) -> None:
+    print("\nAI-Generated Explanations:\n")
+    for rank, rec in enumerate(recommendations, start=1):
+        song, score, explanation = rec
+        context = retrieve_context(song, score, explanation)
+        ai_text = generate_explanation(context)
+        print(f"{rank}. {song['title']} — {ai_text}\n")
 
-    # Starter example profile
+
+def main() -> None:
+    os.makedirs("logs", exist_ok=True)
+    songs = load_songs("data/songs.csv")
+
     user_prefs = HIGH_ENERGY_POP
 
     recommendations = recommend_songs(user_prefs, songs, k=5, ranking_mode=RANKING_MODE)
 
     print_recommendation_table(recommendations, RANKING_MODE)
+    print_ai_explanations(recommendations)
 
 
 if __name__ == "__main__":
