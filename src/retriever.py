@@ -1,7 +1,7 @@
 """Retrieval layer: gathers structured context about a song before generation."""
 
 from typing import Dict, List, Union
-from .knowledge_base import get_genre_note, get_mood_note
+from .knowledge_base import get_genre_note, get_mood_note, get_artist_note
 
 
 def retrieve_context(song: Dict, score: float, reasons: Union[List[str], str]) -> Dict:
@@ -25,6 +25,7 @@ def retrieve_context(song: Dict, score: float, reasons: Union[List[str], str]) -
         "mood": song.get("mood", ""),
         "genre_note": get_genre_note(song.get("genre", "")),
         "mood_note": get_mood_note(song.get("mood", "")),
+        "artist_note": get_artist_note(song.get("artist", "")),
         "score": score,
         "score_reasons": reasons_text,
     }

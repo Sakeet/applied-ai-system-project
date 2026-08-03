@@ -62,6 +62,33 @@ This is implemented across three files:
 
 All API failures and fallbacks are logged to `logs/app.log` for debugging.
 
+## RAG Enhancement (Stretch Feature)
+
+The retrieval system was extended to pull from a third data source — **artist-level notes** — in addition to genre and mood notes, giving the generation step richer, multi-source context per recommendation.
+
+**Before (retrieved context):**
+```json
+{
+  "title": "Sunrise City",
+  "artist": "Neon Echo",
+  "genre_note": "Pop tracks tend to prioritize catchy hooks, polished production, and broad appeal.",
+  "mood_note": "Happy-tagged tracks usually pair upbeat tempo with bright, major-leaning tonality."
+}
+```
+
+**After (retrieved context):**
+```json
+{
+  "title": "Sunrise City",
+  "artist": "Neon Echo",
+  "genre_note": "Pop tracks tend to prioritize catchy hooks, polished production, and broad appeal.",
+  "mood_note": "Happy-tagged tracks usually pair upbeat tempo with bright, major-leaning tonality.",
+  "artist_note": "Known for blending upbeat pop hooks with electronic production."
+}
+```
+
+This additional context is passed directly into the generation prompt in `rag_explainer.py`, so AI-generated explanations can now reference the artist's known style alongside genre and mood, producing more specific and grounded explanations.
+
 ### Algorithm Recipe
 
 My program will score each song with a simple rule-based content match, then sort all songs from highest score to lowest score. The main rules are:

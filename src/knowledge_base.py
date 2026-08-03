@@ -23,3 +23,13 @@ def get_genre_note(genre: str) -> str:
 
 def get_mood_note(mood: str) -> str:
     return MOOD_NOTES.get(str(mood).lower(), f"No specific notes available for the '{mood}' mood.")
+
+ARTIST_NOTES = {
+    "neon echo": "Known for blending upbeat pop hooks with electronic production.",
+    "indigo parade": "An indie act known for atmospheric, mood-driven tracks.",
+    "max pulse": "A high-energy act often associated with workout and driving playlists.",
+    "voltline": "An electronic-leaning artist known for driving, textured production.",
+}
+
+def get_artist_note(artist: str) -> str:
+    return ARTIST_NOTES.get(str(artist).lower(), f"No specific notes available for the artist '{artist}'.")
