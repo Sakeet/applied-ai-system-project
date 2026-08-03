@@ -1,17 +1,16 @@
-# 🎵 Music Recommender Simulation
+# 🎵 VibeFinder AI — Music Recommender with AI-Generated Explanations
+
+## Original Project
+
+This project is an evolution of my **Module 1-3 submission, "VibeFinder"** — a rule-based music recommender that scored songs against a user's taste profile using weighted features like genre, mood, and energy. The original system loaded a small song catalog, computed a score breakdown for each track, and returned a ranked top-K list with plain-text explanations of why each song scored the way it did.
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
+VibeFinder AI builds on that foundation by adding Retrieval-Augmented Generation (RAG): instead of only showing a numeric score breakdown, the system now retrieves relevant context about each recommended song and uses Claude to generate a natural-language explanation grounded in that data. The goal is to make recommendations more transparent and human-readable while preserving the underlying content-based scoring logic.
 
-Your goal is to:
+## Architecture Overview
 
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+The system diagram (`diagrams/architecture.mmd`) shows four stages: an **Input** layer (song catalog + user taste profile), a **Recommender Engine** (loads data, scores songs, ranks them), a **RAG Explanation Layer** (retrieves relevant context per song and generates a natural-language explanation via the Claude API, with a rule-based fallback), and an **Output** layer (the ranked recommendations plus their AI-generated explanations). A separate **Verification** layer shows how each stage is checked — automated tests validate scoring logic, logs capture AI failures for review, and manual run-throughs confirm output quality after each change.
 
 ---
 
@@ -189,6 +188,37 @@ Top recommendations:
 ```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+
+## Sample Interactions
+
+**Example 1 — High energy pop user:**
+Input: `{"genre": "pop", "mood": "happy", "energy": 0.8}`
+Output: *"'Sunrise City' by Neon Echo scored 7.11. Reasons: genre match (+1.0), mood match (+1.0), energy closeness (+3.92)..."* — the AI explanation layer converts this score breakdown into a natural-language summary of why the track fits the user's taste.
+
+**Example 2 — Chill lo-fi user:**
+Input: `{"genre": "lofi", "mood": "chill", "energy": 0.4}`
+Output: The recommender shifts toward calmer, lower-energy tracks, and the AI explanation highlights the mood and acoustic qualities that made each track a good match instead of just listing raw scores.
+
+**Example 3 — No API key configured (fallback mode):**
+Output: *"'Rooftop Lights' by Indigo Parade scored 5.95. Reasons: mood match (+1.0), energy closeness (+3.84)..."* — when the Anthropic API is unavailable, the system automatically falls back to a plain-text explanation built directly from the score breakdown, so the app still produces useful output without crashing.
+
+## Design Decisions
+
+I chose to keep the original rule-based scoring engine untouched and add RAG as a separate layer on top of it, rather than rewriting the recommender itself. This kept the core logic's behavior predictable and testable while letting me experiment with the AI explanation layer independently.
+
+I used a small local knowledge base (`knowledge_base.py`) instead of calling an external API for genre/mood context, since the assignment's scope didn't require a large external dataset, and a local lookup made the system easier to test and less prone to outside failures.
+
+The generation prompt explicitly instructs the model to use only the retrieved context and not invent details — this was a deliberate trade-off between "richer" but less grounded output, and consistent, source-backed explanations that map back to code the grader can verify.
+
+I also built in a fallback path from the start, rather than treating error handling as an afterthought, since a broken API call shouldn't take down the whole recommendation flow.
+
+## Testing Summary
+
+I ran the app after each new file was added to confirm the recommendation table still printed correctly and that the AI-generated explanations section appeared without breaking existing functionality. I tested the system both with and without an `ANTHROPIC_API_KEY` set, confirming the fallback path activates correctly and logs a warning to `logs/app.log` in each case.
+
+One bug I found and fixed: the log file was being created before its parent folder existed, which crashed the app on a fresh clone. I fixed this by explicitly creating the `logs/` folder before configuring the logger.
+
+What I didn't get to: automated tests specifically for the RAG layer (`retriever.py` and `rag_explainer.py`) — testing currently relies on manual verification and log review rather than a dedicated pytest suite for this feature. This would be a natural next step to make the testing more rigorous.
 
 ---
 
