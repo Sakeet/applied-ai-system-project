@@ -220,6 +220,16 @@ One bug I found and fixed: the log file was being created before its parent fold
 
 What I didn't get to: automated tests specifically for the RAG layer (`retriever.py` and `rag_explainer.py`) — testing currently relies on manual verification and log review rather than a dedicated pytest suite for this feature. This would be a natural next step to make the testing more rigorous.
 
+### Human Evaluation
+
+| Test Input | Evaluation Criteria | Result |
+|---|---|---|
+| High energy pop profile, API key set | Explanation is grounded in retrieved genre/mood/score data, not invented | Pass |
+| Chill lo-fi profile, API key set | Explanation reflects mood/acoustic qualities correctly | Pass |
+| No API key configured | System falls back to rule-based explanation instead of crashing | Pass |
+| Missing `logs/` folder on fresh clone | App should create the folder automatically | Fail — crashed; fixed by adding `os.makedirs("logs", exist_ok=True)` |
+| Empty/malformed song data | Not yet tested | Untested |
+
 ---
 
 ## Experiments You Tried
