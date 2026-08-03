@@ -89,6 +89,29 @@ The explanation pipeline now runs two steps instead of one: (1) generate an expl
 3. **Verify** — a second AI call checks the explanation against the same context and returns `VALID` or `INVALID: <reason>` (`verify_explanation()`)
 4. **Report** — the explanation is printed alongside its verification status (`verified`, `flagged: <reason>`, or `unverified` if the API is unavailable)
 
+**Example captured trace (Sunrise City, High Energy Pop profile):**
+
+```
+Step 1 — Retrieve:
+{
+  "title": "Sunrise City",
+  "artist": "Neon Echo",
+  "genre_note": "Pop tracks tend to prioritize catchy hooks, polished production, and broad appeal.",
+  "mood_note": "Happy-tagged tracks usually pair upbeat tempo with bright, major-leaning tonality.",
+  "artist_note": "Known for blending upbeat pop hooks with electronic production.",
+  "score": 7.11,
+  "score_reasons": "genre match (+1.0), mood match (+1.0), energy closeness (+3.92)..."
+}
+
+Step 2 — Generate:
+"'Sunrise City' by Neon Echo scored 7.11. Reasons: genre match (+1.0), mood match (+1.0), energy closeness (+3.92)..."
+
+Step 3 — Verify:
+[Self-check: unverified (API unavailable)]
+(When an API key is configured, this step returns VALID or INVALID: <reason>,
+based on whether the explanation only used facts from the retrieved context above.)
+```
+
 **What I verified manually:**
 
 I ran the full pipeline without an API key configured and confirmed every recommendation correctly reported `[Self-check: unverified (API unavailable)]` instead of crashing or silently skipping the verification step. This confirmed the agentic step degrades gracefully in the same way the generation step does, using the same fallback pattern.
