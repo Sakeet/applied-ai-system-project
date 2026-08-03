@@ -390,5 +390,9 @@ Write 1 to 2 paragraphs here about what you learned:
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
 
+---
 
+## Portfolio Reflection
+
+This project shows my ability to take an existing rule-based system and extend it with a real AI capability (RAG) without breaking what already worked, while building in proper error handling, logging, automated testing, and a self-verification step. It reflects how I approach AI engineering: start from something that works, add capability incrementally, verify each layer, and document trade-offs honestly rather than overselling what the system does.
 
