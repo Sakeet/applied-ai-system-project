@@ -48,3 +48,13 @@ My biggest learning moment was seeing how much the score changed when I adjusted
 
 What surprised me most was that a simple algorithm can still feel like a real recommender. It does not understand music the way a person does, but it can still produce patterns that seem reasonable. If I extended this project, I would add more songs, try softer preference ranges, and test whether diversity improves when the weights are less extreme.
 
+## 10. Reflection on Building the RAG Feature
+
+Adding the RAG explanation layer meant collaborating closely with AI on both the design and the implementation. I used AI to help scope a realistic feature for a short timeline, design the retrieval/generation split, and write the initial versions of `knowledge_base.py`, `retriever.py`, and `rag_explainer.py`.
+
+**One helpful AI suggestion:** Building in a deterministic fallback from the start, rather than treating error handling as an afterthought, was suggested early on. This turned out to matter a lot in practice — I built and tested this entire feature without ever purchasing API credits, because the fallback let the app run correctly the whole time. It also meant that when I eventually connected a real API key, nothing about the rest of the system had to change.
+
+**One flawed AI suggestion:** The first version of `retriever.py` used a type hint of `List[str] or str`, which isn't valid Python typing syntax — it happens to run without erroring, but it's misleading and would look like a mistake to anyone reviewing the code. I caught this by reading through the file carefully rather than just running it, and fixed it to use `Union[List[str], str]` instead. It was a good reminder that AI-generated code can look correct and run without crashing while still containing something that isn't actually right.
+
+**Limitations of this system:** The RAG layer's local knowledge base is small and only covers a handful of genres and moods, so it falls back to a generic note for anything outside that list. I added automated tests for the retrieval layer (`tests/test_retriever.py`), but the generation layer (`rag_explainer.py`) still relies on manual verification and log review, since it depends on a live API call that would need mocking to test automatically — a gap I'd want to close if I extended this project further.
+

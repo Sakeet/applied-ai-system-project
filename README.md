@@ -218,7 +218,7 @@ I ran the app after each new file was added to confirm the recommendation table 
 
 One bug I found and fixed: the log file was being created before its parent folder existed, which crashed the app on a fresh clone. I fixed this by explicitly creating the `logs/` folder before configuring the logger.
 
-What I didn't get to: automated tests specifically for the RAG layer (`retriever.py` and `rag_explainer.py`) — testing currently relies on manual verification and log review rather than a dedicated pytest suite for this feature. This would be a natural next step to make the testing more rigorous.
+I added automated tests for `retriever.py` (`tests/test_retriever.py`, 7 tests) covering normal input, missing song fields, unknown genres, and both string and list reason formats. `rag_explainer.py` still relies on manual verification and log review rather than automated tests, since it makes live API calls that aren't practical to unit test without mocking — that would be a natural next step to make the testing even more rigorous.
 
 ### Human Evaluation
 
