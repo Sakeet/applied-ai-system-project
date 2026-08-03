@@ -10,18 +10,35 @@ flowchart TD
         E[Ranker: Sorts songs by total score]
     end
 
+    subgraph RAG[src - RAG Explanation Layer]
+        F[Retriever: Gathers song data, score breakdown, and knowledge base notes]
+        G[Knowledge Base: Local genre and mood reference data]
+        H[Generator: Claude API creates explanation from retrieved context only]
+        I[Fallback: Rule-based explanation if API unavailable]
+    end
+
     subgraph Output
-        F[Top-K Recommendations with score breakdown]
+        J[Top-K Recommendations with score breakdown]
+        K[AI-Generated Explanations]
+    end
+
+    subgraph Verification[Human and Automated Verification]
+        L[test_recommender.py: Validates scoring logic]
+        M[logs slash app.log: Records fallback and error events for manual review]
+        N[Manual run-through: Developer checks output after each change]
     end
 
     A --> C
     C --> D
     B --> D
     D --> E
+    E --> J
     E --> F
-
-    subgraph Tests[tests]
-        G[test_recommender.py: Validates scoring logic]
-    end
-
-    D -.validated by.-> G
+    F --> G
+    F --> H
+    H --> I
+    H --> K
+    I --> K
+    D -.validated by.-> L
+    H -.logged for review.-> M
+    K -.checked by.-> N
