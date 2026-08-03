@@ -357,38 +357,19 @@ Latest run: **15/15 checks passed (100%)** across all 5 profiles.
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+I compared how the recommender behaved across different ranking modes (`balanced`, `genre_first`, `energy_first`) and confirmed that switching modes meaningfully changed which songs rose to the top — `genre_first` consistently prioritized exact genre matches over energy closeness, while `energy_first` did the opposite. I also tested how the system behaved for edge-case user profiles: a blank profile fell back to weighting energy and acousticness more heavily, and a profile with mismatched capitalization (e.g. "POP" instead of "pop") behaved identically to the correctly-cased version, confirming the matching logic is case-insensitive.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+This recommender only works on a very small catalog (18 songs), so results will repeat quickly for real-world use. It has no understanding of lyrics, language, or subjective musical quality — it matches structured metadata only. It can over-favor genre and mood matches at the expense of songs that fit a user's energy or overall vibe but don't match the favorite genre exactly, and the RAG explanation layer inherits these same biases since its explanations are grounded in the same underlying scores. See `model_card.md` for a deeper discussion of biases, misuse risks, and mitigations.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+The full reflection — including AI collaboration, one helpful and one flawed AI suggestion, and a discussion of limitations, bias, and misuse risks — is documented in [**Model Card**](model_card.md), Sections 9 and 10.
 
 ---
 
