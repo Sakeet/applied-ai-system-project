@@ -45,6 +45,24 @@ taste_profile = {
 
 Prompt for critique: Does this user profile give the recommender enough information to tell the difference between "intense rock" and "chill lofi," or is it too narrow to handle more than one listening style? How should the point weights be balanced so a mood match matters relative to a genre match, and what would you change to make it more flexible without losing specificity?
 
+---
+
+## AI-Powered Explanations (RAG)
+
+To go beyond raw scores, this project uses Retrieval-Augmented Generation (RAG) to produce natural-language explanations for each recommendation.
+
+**How it works:**
+1. **Retrieve**: For each recommended song, the system pulls together the song's attributes, its computed score breakdown, and background notes on its genre and mood from a small local knowledge base (`src/knowledge_base.py`).
+2. **Generate**: That retrieved context is passed to Claude (Anthropic's API), which is instructed to explain the recommendation using *only* the facts provided — not invented details.
+3. **Fallback**: If no API key is configured, or the API call fails for any reason, the system automatically falls back to a plain-text explanation built directly from the score data, so the app never crashes and always produces output.
+
+This is implemented across three files:
+- `src/knowledge_base.py` — local genre/mood reference data
+- `src/retriever.py` — gathers context for a given recommendation
+- `src/rag_explainer.py` — generates the explanation, with logging and error handling
+
+All API failures and fallbacks are logged to `logs/app.log` for debugging.
+
 ### Algorithm Recipe
 
 My program will score each song with a simple rule-based content match, then sort all songs from highest score to lowest score. The main rules are:
@@ -84,6 +102,16 @@ Potential bias: this system might over-prioritize genre and mood matches, so it 
 ```bash
 pip install -r requirements.txt
 ```
+### API Key Setup (for AI-generated explanations)
+
+This project uses the Anthropic API to generate natural-language explanations.
+
+1. Get an API key from https://console.anthropic.com
+2. Set it as an environment variable before running:
+   - Windows (PowerShell): `$env:ANTHROPIC_API_KEY="your-key-here"`
+   - Mac/Linux: `export ANTHROPIC_API_KEY="your-key-here"`
+
+If no key is set, the app still runs normally — it will use a rule-based fallback explanation instead of an AI-generated one.
 
 3. Run the app:
 
