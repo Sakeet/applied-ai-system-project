@@ -35,12 +35,28 @@ def print_recommendation_table(recommendations, mode: str) -> None:
 
 
 def print_ai_explanations(recommendations) -> None:
-    print("\nAI-Generated Explanations:\n")
+    try:
+        from .rag_explainer import verify_explanation
+    except ImportError:
+        from rag_explainer import verify_explanation
+
+    print("\nAI-Generated Explanations (with self-verification):\n")
     for rank, rec in enumerate(recommendations, start=1):
         song, score, explanation = rec
         context = retrieve_context(song, score, explanation)
+
         ai_text = generate_explanation(context)
-        print(f"{rank}. {song['title']} — {ai_text}\n")
+        check = verify_explanation(context, ai_text)
+
+        if check["valid"] is None:
+            status = "unverified (API unavailable)"
+        elif check["valid"]:
+            status = "verified"
+        else:
+            status = f"flagged: {check['reason']}"
+
+        print(f"{rank}. {song['title']} — {ai_text}")
+        print(f"   [Self-check: {status}]\n")
 
 
 def main() -> None:

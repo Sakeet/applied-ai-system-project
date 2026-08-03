@@ -76,3 +76,55 @@ def generate_explanation(context: Dict, client: Optional["anthropic.Anthropic"] 
     except Exception as e:
         logger.error(f"RAG explanation failed for '{context['title']}': {e}")
         return fallback
+
+def verify_explanation(context: Dict, explanation: str, client: Optional["anthropic.Anthropic"] = None) -> Dict:
+    """
+    Agentic self-check step: asks the model to verify that the explanation
+    only uses facts present in the retrieved context, and does not invent
+    details about the song. Returns a dict with 'valid' (bool) and 'reason' (str).
+
+    Falls back to marking verification as skipped if the API is unavailable,
+    since this step depends on the same client as generation.
+    """
+    if not _CLIENT_AVAILABLE:
+        return {"valid": None, "reason": "Verification skipped: anthropic package not installed."}
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return {"valid": None, "reason": "Verification skipped: ANTHROPIC_API_KEY not set."}
+
+    try:
+        if client is None:
+            client = anthropic.Anthropic(api_key=api_key)
+
+        check_prompt = (
+            "You are checking whether an explanation about a song recommendation "
+            "only uses facts from the context below, without inventing details.\n\n"
+            f"Context:\n"
+            f"Song: {context['title']} by {context['artist']}\n"
+            f"Genre note: {context['genre_note']}\n"
+            f"Mood note: {context['mood_note']}\n"
+            f"Score reasons: {context['score_reasons']}\n\n"
+            f"Explanation to check:\n\"{explanation}\"\n\n"
+            "Reply with exactly one line in this format: VALID or INVALID: <short reason>"
+        )
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=100,
+            messages=[{"role": "user", "content": check_prompt}],
+        )
+
+        text = "".join(
+            block.text for block in response.content if block.type == "text"
+        ).strip()
+
+        is_valid = text.upper().startswith("VALID")
+        reason = text.split(":", 1)[1].strip() if ":" in text else text
+
+        logger.info(f"Verification for '{context['title']}': {'VALID' if is_valid else 'INVALID'} — {reason}")
+        return {"valid": is_valid, "reason": reason}
+
+    except Exception as e:
+        logger.error(f"Verification failed for '{context['title']}': {e}")
+        return {"valid": None, "reason": f"Verification failed: {e}"}

@@ -89,6 +89,12 @@ The retrieval system was extended to pull from a third data source — **artist-
 
 This additional context is passed directly into the generation prompt in `rag_explainer.py`, so AI-generated explanations can now reference the artist's known style alongside genre and mood, producing more specific and grounded explanations.
 
+## Agentic Workflow Enhancement (Stretch Feature)
+
+The RAG explanation pipeline now includes a second, self-checking step. After generating an explanation, a separate AI call verifies that the explanation only used facts from the retrieved context, flagging it as `VALID` or `INVALID: <reason>` if it appears to have invented details. This turns the pipeline into a two-step agentic loop (generate → verify) rather than a single call, and results are logged for each recommendation.
+
+See `ai_interactions.md` for the full reasoning trace.
+
 ### Algorithm Recipe
 
 My program will score each song with a simple rule-based content match, then sort all songs from highest score to lowest score. The main rules are:

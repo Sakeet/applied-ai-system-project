@@ -71,3 +71,24 @@ The agent created three new files: `src/knowledge_base.py` (a small local refere
 **What did you verify or fix manually?**
 
 I ran the app after each change to confirm the recommendation table still printed correctly and that the AI-generated explanations section appeared without errors. I found and fixed a bug where the log file was created before its folder existed, causing a crash on a fresh clone — I added `os.makedirs("logs", exist_ok=True)` before the logging setup to fix it. I also checked `retriever.py`'s type hints, since an invalid `List[str] or str` annotation needed to be corrected to `Union[List[str], str]`. I confirmed the fallback path works correctly by running the app without an API key set and checking that `logs/app.log` recorded the fallback warnings as expected.
+
+---
+
+## Agentic Workflow Enhancement (Stretch Feature)
+
+> Documenting the multi-step reasoning added to the RAG explanation pipeline.
+
+**What was added:**
+
+The explanation pipeline now runs two steps instead of one: (1) generate an explanation grounded in retrieved context, then (2) a second, separate AI call verifies whether that explanation only used facts present in the context, flagging it if not. This is implemented in `verify_explanation()` in `src/rag_explainer.py`, and wired into `main.py`'s `print_ai_explanations()` function so every recommendation goes through both steps.
+
+**Reasoning trace (per recommendation):**
+
+1. **Retrieve** — gather song attributes, score breakdown, and genre/mood/artist notes (`retriever.py`)
+2. **Generate** — produce a natural-language explanation using only the retrieved context (`generate_explanation()`)
+3. **Verify** — a second AI call checks the explanation against the same context and returns `VALID` or `INVALID: <reason>` (`verify_explanation()`)
+4. **Report** — the explanation is printed alongside its verification status (`verified`, `flagged: <reason>`, or `unverified` if the API is unavailable)
+
+**What I verified manually:**
+
+I ran the full pipeline without an API key configured and confirmed every recommendation correctly reported `[Self-check: unverified (API unavailable)]` instead of crashing or silently skipping the verification step. This confirmed the agentic step degrades gracefully in the same way the generation step does, using the same fallback pattern.
