@@ -257,6 +257,17 @@ I added automated tests for `retriever.py` (`tests/test_retriever.py`, 7 tests) 
 | Missing `logs/` folder on fresh clone | App should create the folder automatically | Fail — crashed; fixed by adding `os.makedirs("logs", exist_ok=True)` |
 | Empty/malformed song data | Not yet tested | Untested |
 
+### Automated Evaluation Harness (Stretch Feature)
+
+`src/evaluate.py` runs the full recommendation and RAG pipeline against 5 predefined user profiles (including edge cases like a blank profile and mismatched capitalization) and checks three things for each: that recommendations are returned, that they're correctly ranked by score, and that the RAG explanation pipeline completes without crashing.
+
+Run it with:
+```bash
+python -m src.evaluate
+```
+
+Latest run: **15/15 checks passed (100%)** across all 5 profiles.
+
 ---
 
 ## Experiments You Tried
